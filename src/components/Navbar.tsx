@@ -4,9 +4,10 @@ import { Menu, X } from "lucide-react";
 interface NavbarProps {
   onScrollTo: (elementId: string) => void;
   activeSection: string;
+  onOpenIdolChat: () => void;
 }
 
-export default function Navbar({ onScrollTo, activeSection }: NavbarProps) {
+export default function Navbar({ onScrollTo, activeSection, onOpenIdolChat }: NavbarProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   const navItems = [
@@ -16,6 +17,7 @@ export default function Navbar({ onScrollTo, activeSection }: NavbarProps) {
     { id: "game", label: "Тоглоом 🎮" },
     { id: "testimonials", label: "Амжилт" },
     { id: "contact", label: "Холбоо барих" },
+    { id: "idol", label: "🤖 My Idol" },
   ];
 
   return (
@@ -43,10 +45,16 @@ export default function Navbar({ onScrollTo, activeSection }: NavbarProps) {
               href={`#${item.id}`}
               onClick={(e) => {
                 e.preventDefault();
-                onScrollTo(item.id);
+                if (item.id === "idol") {
+                  onOpenIdolChat();
+                } else {
+                  onScrollTo(item.id);
+                }
               }}
               className={`text-sm tracking-wide transition-colors duration-200 hover:text-white ${
-                activeSection === item.id ? "text-white font-medium" : "text-neutral-400"
+                item.id === "idol"
+                  ? "text-teal-400 font-semibold hover:text-teal-300 border-b border-teal-500/30"
+                  : activeSection === item.id ? "text-white font-medium" : "text-neutral-400"
               }`}
               id={`nav-link-${item.id}`}
             >
@@ -89,11 +97,17 @@ export default function Navbar({ onScrollTo, activeSection }: NavbarProps) {
                 href={`#${item.id}`}
                 onClick={(e) => {
                   e.preventDefault();
-                  onScrollTo(item.id);
+                  if (item.id === "idol") {
+                    onOpenIdolChat();
+                  } else {
+                    onScrollTo(item.id);
+                  }
                   setIsOpen(false);
                 }}
                 className={`text-base py-1 transition-colors ${
-                  activeSection === item.id ? "text-white font-medium pl-2 border-l-2 border-white" : "text-neutral-400"
+                  item.id === "idol"
+                    ? "text-teal-400 font-semibold pl-2 border-l-2 border-teal-400"
+                    : activeSection === item.id ? "text-white font-medium pl-2 border-l-2 border-white" : "text-neutral-400"
                 }`}
                 id={`nav-mobile-link-${item.id}`}
               >

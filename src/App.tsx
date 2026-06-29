@@ -12,9 +12,12 @@ import Game from "./components/Game";
 import Testimonials from "./components/Testimonials";
 import Contact from "./components/Contact";
 import Footer from "./components/Footer";
+import IdolCoachChat from "./components/IdolCoachChat";
+import MeAIChat from "./components/MeAIChat";
 
 export default function App() {
   const [activeSection, setActiveSection] = useState("home");
+  const [isIdolChatOpen, setIsIdolChatOpen] = useState(false);
 
   // Smooth scroll handler
   const handleScrollTo = (id: string) => {
@@ -62,7 +65,11 @@ export default function App() {
       <div className="absolute inset-0 z-0 opacity-15 mix-blend-overlay bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] pointer-events-none" />
 
       {/* Sticky Navigation */}
-      <Navbar onScrollTo={handleScrollTo} activeSection={activeSection} />
+      <Navbar 
+        onScrollTo={handleScrollTo} 
+        activeSection={activeSection} 
+        onOpenIdolChat={() => setIsIdolChatOpen(true)} 
+      />
 
       {/* Hero Landing Section */}
       <Hero onScrollTo={handleScrollTo} />
@@ -87,6 +94,10 @@ export default function App() {
 
       {/* Simple Footer Links */}
       <Footer onScrollTo={handleScrollTo} />
+
+      {/* Gemini AI Powered Chats */}
+      <IdolCoachChat isOpen={isIdolChatOpen} onClose={() => setIsIdolChatOpen(false)} />
+      <MeAIChat />
     </div>
   );
 }
