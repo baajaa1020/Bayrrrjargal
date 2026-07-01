@@ -3,60 +3,80 @@
     "id": 1,
     "emojis": "🏴‍☠️🍖⛵⚔️👑",
     "answer": "One Piece",
-    "options": ["One Piece", "Naruto", "Fairy Tail", "Attack on Titan"]
+    "options": ["One Piece", "Naruto", "Fairy Tail", "Attack on Titan"],
+    "image": "https://upload.wikimedia.org/wikipedia/en/9/90/One_Piece%2C_Volume_61_Cover_Art.png",
+    "video": "S8_YwFLCh4Y"
   },
   {
     "id": 2,
     "emojis": "🦊🍥⚡👁️🥷",
     "answer": "Naruto",
-    "options": ["Bleach", "Naruto", "Jujutsu Kaisen", "My Hero Academia"]
+    "options": ["Bleach", "Naruto", "Jujutsu Kaisen", "My Hero Academia"],
+    "image": "https://upload.wikimedia.org/wikipedia/en/9/94/NarutoCoverTankobon1.jpg",
+    "video": "2Z2P6f83vCg"
   },
   {
     "id": 3,
     "emojis": "⚔️🐗⚡🎋👹",
     "answer": "Demon Slayer",
-    "options": ["Demon Slayer", "Jujutsu Kaisen", "Inuyasha", "Tokyo Ghoul"]
+    "options": ["Demon Slayer", "Jujutsu Kaisen", "Inuyasha", "Tokyo Ghoul"],
+    "image": "https://upload.wikimedia.org/wikipedia/en/0/09/Demon_Slayer_-_Kimetsu_no_Yaiba%2C_volume_1.jpg",
+    "video": "VQGCKyvzIM4"
   },
   {
     "id": 4,
     "emojis": "🧱🦖🗡️🎖️🔥",
     "answer": "Attack on Titan",
-    "options": ["Attack on Titan", "Sword Art Online", "Fullmetal Alchemist", "Gundam"]
+    "options": ["Attack on Titan", "Sword Art Online", "Fullmetal Alchemist", "Gundam"],
+    "image": "https://upload.wikimedia.org/wikipedia/en/d/d6/Shingeki_no_Kyojin_manga_volume_1.jpg",
+    "video": "MGRm4IzK1SQ"
   },
   {
     "id": 5,
     "emojis": "🐉🟠☄️🥋🐒",
     "answer": "Dragon Ball",
-    "options": ["One Punch Man", "Hunter x Hunter", "Dragon Ball", "Fist of the North Star"]
+    "options": ["One Punch Man", "Hunter x Hunter", "Dragon Ball", "Fist of the North Star"],
+    "image": "https://upload.wikimedia.org/wikipedia/en/c/c9/Dragon_Ball_Volume_1_cover.jpg",
+    "video": "W7I7YJv3Wno"
   },
   {
     "id": 6,
     "emojis": "🍎📓🖊️📓💀",
     "answer": "Death Note",
-    "options": ["Tokyo Ghoul", "Death Note", "Monster", "Code Geass"]
+    "options": ["Tokyo Ghoul", "Death Note", "Monster", "Code Geass"],
+    "image": "https://upload.wikimedia.org/wikipedia/en/6/6f/Death_Note_Vol_1.jpg",
+    "video": "u_C4VvHIsD4"
   },
   {
     "id": 7,
     "emojis": "🦸‍♂️🏫💥🥦🔥",
     "answer": "My Hero Academia",
-    "options": ["My Hero Academia", "Assassination Classroom", "Mob Psycho 100", "Black Clover"]
+    "options": ["My Hero Academia", "Assassination Classroom", "Mob Psycho 100", "Black Clover"],
+    "image": "https://upload.wikimedia.org/wikipedia/en/3/32/My_Hero_Academia_volume_1_cover.png",
+    "video": "EP_8pYgNbyg"
   },
   {
     "id": 8,
     "emojis": "🤞👁️😈🎴👹",
     "answer": "Jujutsu Kaisen",
-    "options": ["Chainsaw Man", "Jujutsu Kaisen", "Bleach", "Soul Eater"]
+    "options": ["Chainsaw Man", "Jujutsu Kaisen", "Bleach", "Soul Eater"],
+    "image": "https://upload.wikimedia.org/wikipedia/en/4/46/Jujutsu_Kaisen_volume_1_cover.jpg",
+    "video": "pkKu9hLT-t8"
   },
   {
     "id": 9,
     "emojis": "🎣🥋🐜⚡🃏",
     "answer": "Hunter x Hunter",
-    "options": ["Hunter x Hunter", "Yu Yu Hakusho", "Fairy Tail", "Toriko"]
+    "options": ["Hunter x Hunter", "Yu Yu Hakusho", "Fairy Tail", "Toriko"],
+    "image": "https://upload.wikimedia.org/wikipedia/en/0/0f/Hunter_x_Hunter_vol_1.jpg",
+    "video": "d6kBeJjUqnk"
   },
   {
     "id": 10,
     "emojis": "🌙🐱🎀✨💫",
     "answer": "Sailor Moon",
-    "options": ["Cardcaptor Sakura", "Sailor Moon", "Madoka Magica", "PreCure"]
+    "options": ["Cardcaptor Sakura", "Sailor Moon", "Madoka Magica", "PreCure"],
+    "image": "https://upload.wikimedia.org/wikipedia/en/2/22/Pretty_Guardian_Sailor_Moon_volume_1_shins%C5%8Dban_cover.jpg",
+    "video": "5m68S_1_NqI"
   }
 ]

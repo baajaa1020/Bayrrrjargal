@@ -695,61 +695,81 @@ export default function Game() {
         id: 1,
         emojis: "🏴‍☠️🍖⛵⚔️👑",
         answer: "One Piece",
-        options: ["One Piece", "Naruto", "Fairy Tail", "Attack on Titan"]
+        options: ["One Piece", "Naruto", "Fairy Tail", "Attack on Titan"],
+        image: "https://upload.wikimedia.org/wikipedia/en/9/90/One_Piece%2C_Volume_61_Cover_Art.png",
+        video: "S8_YwFLCh4Y"
       },
       {
         id: 2,
         emojis: "🦊🍥⚡👁️🥷",
         answer: "Naruto",
-        options: ["Bleach", "Naruto", "Jujutsu Kaisen", "My Hero Academia"]
+        options: ["Bleach", "Naruto", "Jujutsu Kaisen", "My Hero Academia"],
+        image: "https://upload.wikimedia.org/wikipedia/en/9/94/NarutoCoverTankobon1.jpg",
+        video: "2Z2P6f83vCg"
       },
       {
         id: 3,
         emojis: "⚔️🐗⚡🎋👹",
         answer: "Demon Slayer",
-        options: ["Demon Slayer", "Jujutsu Kaisen", "Inuyasha", "Tokyo Ghoul"]
+        options: ["Demon Slayer", "Jujutsu Kaisen", "Inuyasha", "Tokyo Ghoul"],
+        image: "https://upload.wikimedia.org/wikipedia/en/0/09/Demon_Slayer_-_Kimetsu_no_Yaiba%2C_volume_1.jpg",
+        video: "VQGCKyvzIM4"
       },
       {
         id: 4,
         emojis: "🧱🦖🗡️🎖️🔥",
         answer: "Attack on Titan",
-        options: ["Attack on Titan", "Sword Art Online", "Fullmetal Alchemist", "Gundam"]
+        options: ["Attack on Titan", "Sword Art Online", "Fullmetal Alchemist", "Gundam"],
+        image: "https://upload.wikimedia.org/wikipedia/en/d/d6/Shingeki_no_Kyojin_manga_volume_1.jpg",
+        video: "MGRm4IzK1SQ"
       },
       {
         id: 5,
         emojis: "🐉🟠☄️🥋🐒",
         answer: "Dragon Ball",
-        options: ["One Punch Man", "Hunter x Hunter", "Dragon Ball", "Fist of the North Star"]
+        options: ["One Punch Man", "Hunter x Hunter", "Dragon Ball", "Fist of the North Star"],
+        image: "https://upload.wikimedia.org/wikipedia/en/c/c9/Dragon_Ball_Volume_1_cover.jpg",
+        video: "W7I7YJv3Wno"
       },
       {
         id: 6,
         emojis: "🍎📓🖊️📓💀",
         answer: "Death Note",
-        options: ["Tokyo Ghoul", "Death Note", "Monster", "Code Geass"]
+        options: ["Tokyo Ghoul", "Death Note", "Monster", "Code Geass"],
+        image: "https://upload.wikimedia.org/wikipedia/en/6/6f/Death_Note_Vol_1.jpg",
+        video: "u_C4VvHIsD4"
       },
       {
         id: 7,
         emojis: "🦸‍♂️🏫💥🥦🔥",
         answer: "My Hero Academia",
-        options: ["My Hero Academia", "Assassination Classroom", "Mob Psycho 100", "Black Clover"]
+        options: ["My Hero Academia", "Assassination Classroom", "Mob Psycho 100", "Black Clover"],
+        image: "https://upload.wikimedia.org/wikipedia/en/3/32/My_Hero_Academia_volume_1_cover.png",
+        video: "EP_8pYgNbyg"
       },
       {
         id: 8,
         emojis: "🤞👁️😈🎴👹",
         answer: "Jujutsu Kaisen",
-        options: ["Chainsaw Man", "Jujutsu Kaisen", "Bleach", "Soul Eater"]
+        options: ["Chainsaw Man", "Jujutsu Kaisen", "Bleach", "Soul Eater"],
+        image: "https://upload.wikimedia.org/wikipedia/en/4/46/Jujutsu_Kaisen_volume_1_cover.jpg",
+        video: "pkKu9hLT-t8"
       },
       {
         id: 9,
         emojis: "🎣🥋🐜⚡🃏",
         answer: "Hunter x Hunter",
-        options: ["Hunter x Hunter", "Yu Yu Hakusho", "Fairy Tail", "Toriko"]
+        options: ["Hunter x Hunter", "Yu Yu Hakusho", "Fairy Tail", "Toriko"],
+        image: "https://upload.wikimedia.org/wikipedia/en/0/0f/Hunter_x_Hunter_vol_1.jpg",
+        video: "d6kBeJjUqnk"
       },
       {
         id: 10,
         emojis: "🌙🐱🎀✨💫",
         answer: "Sailor Moon",
-        options: ["Cardcaptor Sakura", "Sailor Moon", "Madoka Magica", "PreCure"]
+        options: ["Cardcaptor Sakura", "Sailor Moon", "Madoka Magica", "PreCure"],
+        image: "https://upload.wikimedia.org/wikipedia/en/2/22/Pretty_Guardian_Sailor_Moon_volume_1_shins%C5%8Dban_cover.jpg",
+        video: "5m68S_1_NqI"
       }
     ];
 
@@ -781,15 +801,6 @@ export default function Game() {
 
     const nextLives = guesserLives - 1;
     setGuesserLives(nextLives);
-
-    setTimeout(() => {
-      if (nextLives <= 0) {
-        setGameOver(true);
-        updateHighScore("guesser", score);
-      } else {
-        moveToNextQuestion();
-      }
-    }, 2000);
   };
 
   const handleAnswerClick = (option: string) => {
@@ -823,18 +834,15 @@ export default function Game() {
       setGuesserLives(nextLives);
       triggerEffect("❌ БУРУУ!", 50, 40);
     }
+  };
 
-    setTimeout(() => {
-      const finalLives = isCorrect ? guesserLives : guesserLives - 1;
-      if (finalLives <= 0) {
-        setGameOver(true);
-        // Calculate the score with the point addition already done
-        const finalScore = score + (isCorrect ? (guesserStreak + 1 % 3 === 0 ? 30 : 10) : 0);
-        updateHighScore("guesser", finalScore);
-      } else {
-        moveToNextQuestion();
-      }
-    }, 2000);
+  const handleNextClick = () => {
+    if (guesserLives <= 0) {
+      setGameOver(true);
+      updateHighScore("guesser", score);
+    } else {
+      moveToNextQuestion();
+    }
   };
 
   const moveToNextQuestion = () => {
@@ -877,6 +885,24 @@ export default function Game() {
       if (guesserTimerRef.current) clearInterval(guesserTimerRef.current);
     };
   }, [activeGame, gameStarted, gameOver, gameWon, currentQuestionIndex, selectedAnswer, guesserQuestions]);
+
+  // Auto-advance after answering in Anime Guesser
+  useEffect(() => {
+    if (activeGame !== "guesser" || !gameStarted || gameOver || gameWon || selectedAnswer === null) {
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      if (guesserLives <= 0) {
+        setGameOver(true);
+        updateHighScore("guesser", score);
+      } else {
+        moveToNextQuestion();
+      }
+    }, 2800); // 2.8 seconds to see the result and image
+
+    return () => clearTimeout(timer);
+  }, [selectedAnswer, guesserLives, score, activeGame, gameStarted, gameOver, gameWon]);
 
   const handleBackToMenu = () => {
     setActiveGame("select");
@@ -1498,17 +1524,56 @@ export default function Game() {
                       {/* Question Container */}
                       {guesserQuestions[currentQuestionIndex] && (
                         <div className="space-y-6 w-full">
-                          <div className="text-center space-y-3 bg-neutral-900/30 border border-white/5 py-8 px-4 rounded-3xl relative overflow-hidden">
+                          <div className="text-center space-y-3 bg-neutral-900/30 border border-white/5 py-6 px-4 rounded-3xl relative overflow-hidden">
                             <div className="absolute top-2 right-3 text-[10px] text-neutral-500 font-mono">
                               Асуулт {currentQuestionIndex + 1} / {guesserQuestions.length}
                             </div>
                             
-                            <div className="text-4xl sm:text-5xl tracking-widest select-none drop-shadow-lg filter py-2 animate-pulse">
-                              {guesserQuestions[currentQuestionIndex].emojis}
-                            </div>
-                            <div className="text-xs text-neutral-400 font-light">
-                              Энэ ямар анимэ вэ? 🤔
-                            </div>
+                            {selectedAnswer === null ? (
+                              <>
+                                <div className="text-4xl sm:text-5xl tracking-widest select-none drop-shadow-lg filter py-4 animate-pulse">
+                                  {guesserQuestions[currentQuestionIndex].emojis}
+                                </div>
+                                <div className="text-xs text-neutral-400 font-light">
+                                  Энэ ямар анимэ вэ? 🤔
+                                </div>
+                              </>
+                            ) : (
+                              <div className="flex flex-col items-center space-y-3 animate-fade-rise py-1">
+                                <div className="text-2xl sm:text-3xl tracking-widest opacity-60">
+                                  {guesserQuestions[currentQuestionIndex].emojis}
+                                </div>
+                                
+                                {guesserQuestions[currentQuestionIndex].image && (
+                                  <div className="flex justify-center my-1 animate-fade-rise">
+                                    <div className="relative overflow-hidden rounded-2xl border border-white/10 shadow-lg w-28 h-28 sm:w-32 sm:h-32">
+                                      <img 
+                                        src={guesserQuestions[currentQuestionIndex].image} 
+                                        alt={guesserQuestions[currentQuestionIndex].answer} 
+                                        className="w-full h-full object-cover"
+                                        referrerPolicy="no-referrer"
+                                      />
+                                    </div>
+                                  </div>
+                                )}
+                                
+                                <div className="space-y-1">
+                                  {answerState === "correct" ? (
+                                    <div className="flex items-center gap-1.5 text-emerald-400 font-semibold text-sm justify-center">
+                                      <Sparkles className="w-4 h-4 animate-pulse" />
+                                      <span>Зөв хариуллаа! 🎉</span>
+                                    </div>
+                                  ) : (
+                                    <div className="flex items-center gap-1.5 text-red-400 font-semibold text-sm justify-center">
+                                      <span>Буруу хариуллаа! 😢</span>
+                                    </div>
+                                  )}
+                                  <p className="text-xs text-neutral-300">
+                                    Анимэ: <strong className="text-white font-semibold text-sm">{guesserQuestions[currentQuestionIndex].answer}</strong>
+                                  </p>
+                                </div>
+                              </div>
+                            )}
                           </div>
 
                           {/* Options Grid */}
@@ -1546,6 +1611,17 @@ export default function Game() {
                               );
                             })}
                           </div>
+
+                          {/* Auto-advance notification */}
+                          {selectedAnswer !== null && (
+                            <div className="space-y-4 pt-1 animate-fade-rise">
+                              <div className="text-center text-[11px] text-neutral-500 font-light flex items-center justify-center gap-2 py-1">
+                                <div className="w-2 h-2 rounded-full bg-purple-500 animate-ping"></div>
+                                <span>Дараагийн асуулт ачаалж байна...</span>
+                              </div>
+                            </div>
+                          )}
+
                         </div>
                       )}
 
