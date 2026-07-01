@@ -1,0 +1,62 @@
+[
+  {
+    "id": 1,
+    "emojis": "🏴‍☠️🍖⛵⚔️👑",
+    "answer": "One Piece",
+    "options": ["One Piece", "Naruto", "Fairy Tail", "Attack on Titan"]
+  },
+  {
+    "id": 2,
+    "emojis": "🦊🍥⚡👁️🥷",
+    "answer": "Naruto",
+    "options": ["Bleach", "Naruto", "Jujutsu Kaisen", "My Hero Academia"]
+  },
+  {
+    "id": 3,
+    "emojis": "⚔️🐗⚡🎋👹",
+    "answer": "Demon Slayer",
+    "options": ["Demon Slayer", "Jujutsu Kaisen", "Inuyasha", "Tokyo Ghoul"]
+  },
+  {
+    "id": 4,
+    "emojis": "🧱🦖🗡️🎖️🔥",
+    "answer": "Attack on Titan",
+    "options": ["Attack on Titan", "Sword Art Online", "Fullmetal Alchemist", "Gundam"]
+  },
+  {
+    "id": 5,
+    "emojis": "🐉🟠☄️🥋🐒",
+    "answer": "Dragon Ball",
+    "options": ["One Punch Man", "Hunter x Hunter", "Dragon Ball", "Fist of the North Star"]
+  },
+  {
+    "id": 6,
+    "emojis": "🍎📓🖊️📓💀",
+    "answer": "Death Note",
+    "options": ["Tokyo Ghoul", "Death Note", "Monster", "Code Geass"]
+  },
+  {
+    "id": 7,
+    "emojis": "🦸‍♂️🏫💥🥦🔥",
+    "answer": "My Hero Academia",
+    "options": ["My Hero Academia", "Assassination Classroom", "Mob Psycho 100", "Black Clover"]
+  },
+  {
+    "id": 8,
+    "emojis": "🤞👁️😈🎴👹",
+    "answer": "Jujutsu Kaisen",
+    "options": ["Chainsaw Man", "Jujutsu Kaisen", "Bleach", "Soul Eater"]
+  },
+  {
+    "id": 9,
+    "emojis": "🎣🥋🐜⚡🃏",
+    "answer": "Hunter x Hunter",
+    "options": ["Hunter x Hunter", "Yu Yu Hakusho", "Fairy Tail", "Toriko"]
+  },
+  {
+    "id": 10,
+    "emojis": "🌙🐱🎀✨💫",
+    "answer": "Sailor Moon",
+    "options": ["Cardcaptor Sakura", "Sailor Moon", "Madoka Magica", "PreCure"]
+  }
+]

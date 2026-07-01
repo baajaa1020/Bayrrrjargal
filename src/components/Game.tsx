@@ -5,7 +5,7 @@ import {
   Check, Sparkles, Smile, Volume2, Timer, Music, Heart, MessageSquare, Activity
 } from "lucide-react";
 
-type GameType = "select" | "geometry" | "rhythm" | "memory";
+type GameType = "select" | "geometry" | "rhythm" | "memory" | "guesser";
 
 interface Card {
   id: number;
@@ -43,6 +43,7 @@ export default function Game() {
     geometry: parseInt(localStorage.getItem("arcade_hs_geometry") || "0", 10),
     rhythm: parseInt(localStorage.getItem("arcade_hs_rhythm") || "0", 10),
     memory: parseInt(localStorage.getItem("arcade_hs_memory") || "0", 10),
+    guesser: parseInt(localStorage.getItem("arcade_hs_guesser") || "0", 10),
   });
 
   // GAME STATE Controls
@@ -103,8 +104,19 @@ export default function Game() {
   const [memoryTime, setMemoryTime] = useState(0);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
+  // 4. GAME: ANIME GUESSER
+  const [guesserQuestions, setGuesserQuestions] = useState<any[]>([]);
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [guesserLives, setGuesserLives] = useState(3);
+  const [guesserTimeLeft, setGuesserTimeLeft] = useState(15);
+  const [guesserStreak, setGuesserStreak] = useState(0);
+  const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
+  const [answerState, setAnswerState] = useState<"correct" | "incorrect" | null>(null);
+  const [correctOption, setCorrectOption] = useState<string | null>(null);
+  const guesserTimerRef = useRef<NodeJS.Timeout | null>(null);
+
   // Update overall high score function
-  const updateHighScore = (game: "geometry" | "rhythm" | "memory", currentScore: number) => {
+  const updateHighScore = (game: "geometry" | "rhythm" | "memory" | "guesser", currentScore: number) => {
     if (currentScore > highScores[game]) {
       const newHighs = { ...highScores, [game]: currentScore };
       setHighScores(newHighs);
@@ -624,6 +636,248 @@ export default function Game() {
     }
   };
 
+  // ==========================================
+  // GAME 4: ANIME GUESSER FUNCTIONS
+  // ==========================================
+  const playSound = (type: "ding" | "buzz") => {
+    try {
+      const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
+      if (!AudioContext) return;
+      const ctx = new AudioContext();
+      
+      if (type === "ding") {
+        const now = ctx.currentTime;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(587.33, now); // D5
+        osc.frequency.exponentialRampToValueAtTime(880.00, now + 0.15); // A5
+        gain.gain.setValueAtTime(0.15, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.35);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.35);
+      } else {
+        const now = ctx.currentTime;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = "sawtooth";
+        osc.frequency.setValueAtTime(150.00, now);
+        osc.frequency.linearRampToValueAtTime(110.00, now + 0.25);
+        gain.gain.setValueAtTime(0.15, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.3);
+      }
+    } catch (e) {
+      console.warn("Audio Context failed to play sound:", e);
+    }
+  };
+
+  const startGuesser = async () => {
+    setScore(0);
+    setGuesserLives(3);
+    setGuesserStreak(0);
+    setCurrentQuestionIndex(0);
+    setSelectedAnswer(null);
+    setAnswerState(null);
+    setCorrectOption(null);
+    setGuesserTimeLeft(15);
+    setGameOver(false);
+    setGameWon(false);
+    setGameStarted(true);
+
+    const fallbackQuestions = [
+      {
+        id: 1,
+        emojis: "🏴‍☠️🍖⛵⚔️👑",
+        answer: "One Piece",
+        options: ["One Piece", "Naruto", "Fairy Tail", "Attack on Titan"]
+      },
+      {
+        id: 2,
+        emojis: "🦊🍥⚡👁️🥷",
+        answer: "Naruto",
+        options: ["Bleach", "Naruto", "Jujutsu Kaisen", "My Hero Academia"]
+      },
+      {
+        id: 3,
+        emojis: "⚔️🐗⚡🎋👹",
+        answer: "Demon Slayer",
+        options: ["Demon Slayer", "Jujutsu Kaisen", "Inuyasha", "Tokyo Ghoul"]
+      },
+      {
+        id: 4,
+        emojis: "🧱🦖🗡️🎖️🔥",
+        answer: "Attack on Titan",
+        options: ["Attack on Titan", "Sword Art Online", "Fullmetal Alchemist", "Gundam"]
+      },
+      {
+        id: 5,
+        emojis: "🐉🟠☄️🥋🐒",
+        answer: "Dragon Ball",
+        options: ["One Punch Man", "Hunter x Hunter", "Dragon Ball", "Fist of the North Star"]
+      },
+      {
+        id: 6,
+        emojis: "🍎📓🖊️📓💀",
+        answer: "Death Note",
+        options: ["Tokyo Ghoul", "Death Note", "Monster", "Code Geass"]
+      },
+      {
+        id: 7,
+        emojis: "🦸‍♂️🏫💥🥦🔥",
+        answer: "My Hero Academia",
+        options: ["My Hero Academia", "Assassination Classroom", "Mob Psycho 100", "Black Clover"]
+      },
+      {
+        id: 8,
+        emojis: "🤞👁️😈🎴👹",
+        answer: "Jujutsu Kaisen",
+        options: ["Chainsaw Man", "Jujutsu Kaisen", "Bleach", "Soul Eater"]
+      },
+      {
+        id: 9,
+        emojis: "🎣🥋🐜⚡🃏",
+        answer: "Hunter x Hunter",
+        options: ["Hunter x Hunter", "Yu Yu Hakusho", "Fairy Tail", "Toriko"]
+      },
+      {
+        id: 10,
+        emojis: "🌙🐱🎀✨💫",
+        answer: "Sailor Moon",
+        options: ["Cardcaptor Sakura", "Sailor Moon", "Madoka Magica", "PreCure"]
+      }
+    ];
+
+    try {
+      const response = await fetch("/data.json");
+      if (response.ok) {
+        const data = await response.json();
+        if (Array.isArray(data) && data.length > 0) {
+          setGuesserQuestions(data);
+          return;
+        }
+      }
+    } catch (e) {
+      console.warn("Could not fetch data.json, using fallback questions", e);
+    }
+    
+    setGuesserQuestions(fallbackQuestions);
+  };
+
+  const handleTimeOut = () => {
+    if (selectedAnswer !== null) return;
+    playSound("buzz");
+    setAnswerState("incorrect");
+    setGuesserStreak(0);
+    const currentQ = guesserQuestions[currentQuestionIndex];
+    const correctAns = currentQ ? currentQ.answer : "";
+    setCorrectOption(correctAns);
+    setSelectedAnswer("TIMEOUT_EXPIRED");
+
+    const nextLives = guesserLives - 1;
+    setGuesserLives(nextLives);
+
+    setTimeout(() => {
+      if (nextLives <= 0) {
+        setGameOver(true);
+        updateHighScore("guesser", score);
+      } else {
+        moveToNextQuestion();
+      }
+    }, 2000);
+  };
+
+  const handleAnswerClick = (option: string) => {
+    if (selectedAnswer !== null || gameOver || gameWon) return;
+
+    setSelectedAnswer(option);
+    const currentQ = guesserQuestions[currentQuestionIndex];
+    const isCorrect = option === currentQ.answer;
+
+    if (isCorrect) {
+      playSound("ding");
+      setAnswerState("correct");
+      const nextStreak = guesserStreak + 1;
+      setGuesserStreak(nextStreak);
+
+      let points = 10;
+      if (nextStreak > 0 && nextStreak % 3 === 0) {
+        points += 20;
+        triggerEffect("BONUS +20! 🔥", 50, 40);
+      } else {
+        triggerEffect("+10 ✨", 50, 40);
+      }
+      setScore((prev) => prev + points);
+    } else {
+      playSound("buzz");
+      setAnswerState("incorrect");
+      setGuesserStreak(0);
+      setCorrectOption(currentQ.answer);
+
+      const nextLives = guesserLives - 1;
+      setGuesserLives(nextLives);
+      triggerEffect("❌ БУРУУ!", 50, 40);
+    }
+
+    setTimeout(() => {
+      const finalLives = isCorrect ? guesserLives : guesserLives - 1;
+      if (finalLives <= 0) {
+        setGameOver(true);
+        // Calculate the score with the point addition already done
+        const finalScore = score + (isCorrect ? (guesserStreak + 1 % 3 === 0 ? 30 : 10) : 0);
+        updateHighScore("guesser", finalScore);
+      } else {
+        moveToNextQuestion();
+      }
+    }, 2000);
+  };
+
+  const moveToNextQuestion = () => {
+    setSelectedAnswer(null);
+    setAnswerState(null);
+    setCorrectOption(null);
+    
+    if (currentQuestionIndex + 1 < guesserQuestions.length) {
+      setCurrentQuestionIndex((prev) => prev + 1);
+    } else {
+      setGameWon(true);
+      updateHighScore("guesser", score);
+    }
+  };
+
+  useEffect(() => {
+    if (activeGame !== "guesser" || !gameStarted || gameOver || gameWon) {
+      if (guesserTimerRef.current) clearInterval(guesserTimerRef.current);
+      return;
+    }
+
+    if (selectedAnswer !== null) {
+      if (guesserTimerRef.current) clearInterval(guesserTimerRef.current);
+      return;
+    }
+
+    setGuesserTimeLeft(15);
+    guesserTimerRef.current = setInterval(() => {
+      setGuesserTimeLeft((prev) => {
+        if (prev <= 1) {
+          if (guesserTimerRef.current) clearInterval(guesserTimerRef.current);
+          handleTimeOut();
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => {
+      if (guesserTimerRef.current) clearInterval(guesserTimerRef.current);
+    };
+  }, [activeGame, gameStarted, gameOver, gameWon, currentQuestionIndex, selectedAnswer, guesserQuestions]);
+
   const handleBackToMenu = () => {
     setActiveGame("select");
     setGameOver(false);
@@ -631,6 +885,7 @@ export default function Game() {
     setGameStarted(false);
     setScore(0);
     if (timerRef.current) clearInterval(timerRef.current);
+    if (guesserTimerRef.current) clearInterval(guesserTimerRef.current);
   };
 
   return (
@@ -660,7 +915,7 @@ export default function Game() {
             GAME SELECT SCREEN
            ========================================== */}
         {activeGame === "select" && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6" id="arcade-mode-selection">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6" id="arcade-mode-selection">
             
             {/* GEOMETRY DASH (NEW) */}
             <div className="liquid-glass rounded-3xl p-6 flex flex-col justify-between border border-white/5 hover:scale-[1.03] transition-all duration-300 bg-neutral-900/10 min-h-[300px]">
@@ -669,7 +924,7 @@ export default function Game() {
                   <Activity className="w-6 h-6 text-emerald-400" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-medium text-white">1. Geometry Dash (Cube Run)</h3>
+                  <h3 className="text-lg font-medium text-white">1. Geometry Dash</h3>
                   <p className="text-xs text-neutral-400 font-light mt-2 leading-relaxed">
                     Гялалзсан неон шоог удирдан саад тотгорууд дээгүүр яг зөв цагт нь үсэрч, барианы шугамд хүрээрэй!
                   </p>
@@ -693,7 +948,7 @@ export default function Game() {
                   <Music className="w-6 h-6 text-red-400" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-medium text-white">2. Хөгжмийн Хэмнэл (Rhythm)</h3>
+                  <h3 className="text-lg font-medium text-white">2. Хөгжмийн Хэмнэл</h3>
                   <p className="text-xs text-neutral-400 font-light mt-2 leading-relaxed">
                     Mxrningstar-ын гүн хэмнэлээр унах ноотуудыг яг таг хугацаанд нь дарж оноо цуглуулж комбо үүсгээрэй!
                   </p>
@@ -717,7 +972,7 @@ export default function Game() {
                   <Crown className="w-6 h-6 text-yellow-400" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-medium text-white">3. Ой Тогтоолтын Сорилт</h3>
+                  <h3 className="text-lg font-medium text-white">3. Ой Тогтоолт</h3>
                   <p className="text-xs text-neutral-400 font-light mt-2 leading-relaxed">
                     Хамгийн цөөн нүүдлээр, хамгийн бага хугацаанд гялалзсан картуудыг хослуулж ой тогтоолтоо сориорой.
                   </p>
@@ -727,6 +982,30 @@ export default function Game() {
                 <span className="text-[10px] text-neutral-400">Дээд амжилт: <strong className="text-white font-medium">{highScores.memory}</strong></span>
                 <button 
                   onClick={() => { setActiveGame("memory"); initMemoryGame(); }}
+                  className="px-4 py-2 rounded-xl bg-white text-black text-xs font-bold hover:bg-neutral-200 transition-colors flex items-center gap-1 cursor-pointer"
+                >
+                  Тоглох <ChevronLeft className="w-3 h-3 rotate-180" />
+                </button>
+              </div>
+            </div>
+
+            {/* ANIME GUESSER */}
+            <div className="liquid-glass rounded-3xl p-6 flex flex-col justify-between border border-white/5 hover:scale-[1.03] transition-all duration-300 bg-neutral-900/10 min-h-[300px]">
+              <div className="space-y-4">
+                <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center">
+                  <Sparkles className="w-6 h-6 text-purple-400" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-medium text-white">4. Anime Guesser</h3>
+                  <p className="text-xs text-neutral-400 font-light mt-2 leading-relaxed">
+                    Эможигоор илэрхийлсэн асуултыг харж, 15 секундийн дотор зөв анимэг тааж өөрийгөө сориорой! 🏆
+                  </p>
+                </div>
+              </div>
+              <div className="pt-6 border-t border-white/5 flex items-center justify-between">
+                <span className="text-[10px] text-neutral-400">Дээд амжилт: <strong className="text-white font-medium">{highScores.guesser}</strong></span>
+                <button 
+                  onClick={() => { setActiveGame("guesser"); startGuesser(); }}
                   className="px-4 py-2 rounded-xl bg-white text-black text-xs font-bold hover:bg-neutral-200 transition-colors flex items-center gap-1 cursor-pointer"
                 >
                   Тоглох <ChevronLeft className="w-3 h-3 rotate-180" />
@@ -751,18 +1030,20 @@ export default function Game() {
               >
                 <ChevronLeft className="w-4 h-4" /> Буцах
               </button>
-
-              <div className="text-sm font-medium text-white uppercase tracking-wider font-sans">
+ 
+              <div className="text-sm font-medium text-white uppercase tracking-wider font-sans text-center px-2">
                 {activeGame === "geometry" && "1. Geometry Dash (Cube Run)"}
                 {activeGame === "rhythm" && "2. Хөгжмийн Хэмнэл (Rhythm)"}
                 {activeGame === "memory" && "3. Ой Тогтоолт"}
+                {activeGame === "guesser" && "4. Anime Guesser (Эможи таавар)"}
               </div>
-
+ 
               <div className="flex gap-4 items-center">
                 <div className="text-xs text-neutral-400">Оноо: <strong className="text-white text-sm font-semibold">{score}</strong></div>
-                {activeGame === "geometry" && <div className="text-xs text-neutral-500">HS: {highScores.geometry}%</div>}
-                {activeGame === "rhythm" && <div className="text-xs text-neutral-500">HS: {highScores.rhythm}</div>}
-                {activeGame === "memory" && <div className="text-xs text-neutral-500">HS: {highScores.memory}</div>}
+                {activeGame === "geometry" && <div className="text-xs text-neutral-500 hidden sm:block">HS: {highScores.geometry}%</div>}
+                {activeGame === "rhythm" && <div className="text-xs text-neutral-500 hidden sm:block">HS: {highScores.rhythm}</div>}
+                {activeGame === "memory" && <div className="text-xs text-neutral-500 hidden sm:block">HS: {highScores.memory}</div>}
+                {activeGame === "guesser" && <div className="text-xs text-neutral-500 hidden sm:block">HS: {highScores.guesser}</div>}
               </div>
             </div>
 
@@ -1138,6 +1419,190 @@ export default function Game() {
                         </div>
                       )}
 
+                    </div>
+                  )}
+
+                </div>
+              )}
+
+              {/* ----------------------------------------------------
+                  SUB-GAME 4: ANIME GUESSER PLAYGROUND
+                 ---------------------------------------------------- */}
+              {activeGame === "guesser" && (
+                <div className="w-full max-w-xl px-6 flex flex-col items-center justify-center min-h-[400px]">
+                  
+                  {!gameStarted && !gameOver && !gameWon && (
+                    <div className="text-center p-6 space-y-4 max-w-sm animate-fade-rise">
+                      <div className="w-14 h-14 rounded-full bg-purple-950/40 border border-purple-500/20 flex items-center justify-center mx-auto">
+                        <Sparkles className="w-6 h-6 text-purple-400 animate-pulse" />
+                      </div>
+                      <h3 className="text-lg font-medium text-white">Anime Guesser! 🧩</h3>
+                      <p className="text-xs text-neutral-400 font-light leading-relaxed">
+                        Эможи таавраар хамгийн алдартай анимэнуудыг тааж өөрийгөө сориорой.
+                      </p>
+                      <ul className="text-[11px] text-neutral-500 space-y-1 text-left list-disc list-inside max-w-xs mx-auto">
+                        <li>Зөв хариулбал +10 оноо</li>
+                        <li>Асуулт бүрт 15 секундын хугацаатай</li>
+                        <li>3 амьтай, 3 удаа буруу бол дуусна</li>
+                        <li>Дараалан 3 зөв хариулбал +20 бонус оноо!</li>
+                      </ul>
+                      <button 
+                        onClick={startGuesser}
+                        className="liquid-glass w-full rounded-full py-3 flex items-center justify-center gap-2 text-xs font-bold text-white hover:scale-[1.02] hover:shadow-[0_0_15px_rgba(168,85,247,0.4)] transition-all cursor-pointer"
+                      >
+                        <Play className="w-3.5 h-3.5 fill-white" /> Эхлүүлэх
+                      </button>
+                    </div>
+                  )}
+
+                  {gameStarted && !gameOver && !gameWon && (
+                    <div className="w-full space-y-6 animate-fade-rise" key={currentQuestionIndex}>
+                      
+                      {/* Timer & Lives Dashboard */}
+                      <div className="flex justify-between items-center text-xs text-neutral-400 bg-neutral-900/60 border border-white/5 p-3 rounded-2xl w-full">
+                        {/* Time Left */}
+                        <div className="flex items-center gap-1.5">
+                          <Timer className={`w-4 h-4 ${guesserTimeLeft <= 5 ? "text-red-500 animate-pulse" : "text-purple-400"}`} />
+                          <span>Хугацаа: </span>
+                          <span className={`font-semibold text-sm ${guesserTimeLeft <= 5 ? "text-red-400" : "text-white"}`}>
+                            {guesserTimeLeft}с
+                          </span>
+                        </div>
+
+                        {/* Streak */}
+                        {guesserStreak > 0 && (
+                          <div className="flex items-center gap-1 bg-purple-900/40 border border-purple-500/20 px-2 py-0.5 rounded-full text-[10px] text-purple-300 animate-bounce">
+                            <Flame className="w-3 h-3 text-orange-400 fill-orange-400" />
+                            <span>{guesserStreak} дараалсан!</span>
+                          </div>
+                        )}
+
+                        {/* Lives */}
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-neutral-500">Амь:</span>
+                          <div className="flex gap-1">
+                            {Array.from({ length: 3 }).map((_, i) => (
+                              <Heart 
+                                key={i} 
+                                className={`w-4 h-4 transition-all duration-300 ${
+                                  i < guesserLives 
+                                    ? "text-red-500 fill-red-500 scale-100" 
+                                    : "text-neutral-800 scale-75"
+                                }`} 
+                              />
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Question Container */}
+                      {guesserQuestions[currentQuestionIndex] && (
+                        <div className="space-y-6 w-full">
+                          <div className="text-center space-y-3 bg-neutral-900/30 border border-white/5 py-8 px-4 rounded-3xl relative overflow-hidden">
+                            <div className="absolute top-2 right-3 text-[10px] text-neutral-500 font-mono">
+                              Асуулт {currentQuestionIndex + 1} / {guesserQuestions.length}
+                            </div>
+                            
+                            <div className="text-4xl sm:text-5xl tracking-widest select-none drop-shadow-lg filter py-2 animate-pulse">
+                              {guesserQuestions[currentQuestionIndex].emojis}
+                            </div>
+                            <div className="text-xs text-neutral-400 font-light">
+                              Энэ ямар анимэ вэ? 🤔
+                            </div>
+                          </div>
+
+                          {/* Options Grid */}
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                            {guesserQuestions[currentQuestionIndex].options.map((option: string) => {
+                              const isSelected = selectedAnswer === option;
+                              const isCorrect = option === guesserQuestions[currentQuestionIndex].answer;
+                              const isWrong = isSelected && !isCorrect;
+                              
+                              // Classes based on state
+                              let btnClass = "bg-neutral-900/50 border-white/5 hover:border-purple-500/30 hover:bg-purple-950/10 hover:scale-[1.03] hover:shadow-[0_0_15px_rgba(168,85,247,0.15)] text-white";
+                              
+                              if (selectedAnswer !== null) {
+                                if (isCorrect) {
+                                  btnClass = "bg-emerald-900/40 border-emerald-500/50 text-emerald-300 shadow-[0_0_15px_rgba(16,185,129,0.3)] scale-[1.02]";
+                                } else if (isWrong) {
+                                  btnClass = "bg-red-900/40 border-red-500/50 text-red-300 shadow-[0_0_15px_rgba(239,68,68,0.3)] animate-shake scale-[0.98]";
+                                } else {
+                                  btnClass = "bg-neutral-950/20 border-white/5 text-neutral-600 opacity-50";
+                                }
+                              }
+
+                              return (
+                                <button
+                                  key={option}
+                                  onClick={() => handleAnswerClick(option)}
+                                  disabled={selectedAnswer !== null}
+                                  className={`py-3.5 px-5 rounded-2xl border text-sm font-medium transition-all duration-300 cursor-pointer flex items-center justify-between ${btnClass}`}
+                                >
+                                  <span>{option}</span>
+                                  {selectedAnswer !== null && isCorrect && (
+                                    <Check className="w-4 h-4 text-emerald-400 shrink-0" />
+                                  )}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
+
+                    </div>
+                  )}
+
+                  {/* Game Over Screen */}
+                  {gameOver && (
+                    <div className="text-center p-6 space-y-5 max-w-sm mx-auto animate-fade-rise">
+                      <div className="w-14 h-14 rounded-full bg-red-950/40 border border-red-500/20 flex items-center justify-center mx-auto">
+                        <Flame className="w-6 h-6 text-red-400" />
+                      </div>
+                      <div className="space-y-1.5">
+                        <h3 className="text-xl font-medium text-white">Тоглоом дууслаа! 💔</h3>
+                        <p className="text-xs text-neutral-400 font-light leading-relaxed">
+                          Амь дууссан тул тоглоом зогслоо. Та сорилыг амжилттай дуусгаж чадсангүй.
+                        </p>
+                        <p className="text-lg font-semibold text-purple-400 mt-2">Цуглуулсан оноо: {score}</p>
+                        {score >= highScores.guesser && score > 0 && (
+                          <p className="text-[10px] uppercase tracking-widest text-yellow-400 font-semibold animate-pulse">
+                            🎉 Шинэ дээд амжилт!
+                          </p>
+                        )}
+                      </div>
+                      <button 
+                        onClick={startGuesser}
+                        className="liquid-glass w-full rounded-full py-3 flex items-center justify-center gap-2 text-xs font-bold text-white hover:scale-[1.02] hover:shadow-[0_0_15px_rgba(168,85,247,0.4)] transition-all cursor-pointer"
+                      >
+                        <RotateCcw className="w-3.5 h-3.5" /> Дахин эхлүүлэх
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Game Won Screen */}
+                  {gameWon && (
+                    <div className="text-center p-6 space-y-5 max-w-sm mx-auto animate-fade-rise">
+                      <div className="w-14 h-14 rounded-full bg-emerald-950/40 border border-emerald-500/20 flex items-center justify-center mx-auto">
+                        <Sparkles className="w-6 h-6 text-emerald-400 animate-bounce" />
+                      </div>
+                      <div className="space-y-1.5">
+                        <h3 className="text-xl font-medium text-emerald-400">Сорилыг яллаа! 🎉</h3>
+                        <p className="text-xs text-neutral-400 font-light leading-relaxed">
+                          Баяр хүргэе! Та бүх асуултад амжилттай хариулж, аниме таавар тоглоомыг дуусгалаа.
+                        </p>
+                        <p className="text-lg font-semibold text-emerald-400 mt-2 font-mono">Нийт Оноо: {score}</p>
+                        {score >= highScores.guesser && score > 0 && (
+                          <p className="text-[10px] uppercase tracking-widest text-yellow-400 font-semibold animate-pulse">
+                            🏆 Шинэ дээд амжилт!
+                          </p>
+                        )}
+                      </div>
+                      <button 
+                        onClick={startGuesser}
+                        className="liquid-glass w-full rounded-full py-3 flex items-center justify-center gap-2 text-xs font-bold text-white hover:scale-[1.02] hover:shadow-[0_0_15px_rgba(16,185,129,0.4)] transition-all cursor-pointer"
+                      >
+                        <RotateCcw className="w-3.5 h-3.5" /> Дахин тоглох
+                      </button>
                     </div>
                   )}
 
